@@ -9,6 +9,7 @@ import { Context } from "../types/context";
 
 @Resolver(User)
 export class UserResolver {
+	
 	/**
 	 *
 	 * @param id user id (mongo id)
