@@ -1,10 +1,10 @@
 import { Arg, Mutation, Query, Resolver, Ctx } from "type-graphql";
 import mongoose from "mongoose";
 import { CookieOptions } from "express";
+import { isEmail } from "class-validator";
 
 import { CreateUserInput, User, UserModel } from "../schemas/User.schema";
 import { ResolverError } from "../utils/index";
-import { isEmail } from "class-validator";
 import { Context } from "../types/context";
 
 @Resolver(User)
@@ -165,6 +165,8 @@ export class UserResolver {
 
 	@Query(() => User)
 	async me(@Ctx() { req }: Context): Promise<User> {
+		if (!req.cookies["userId"]) throw new ResolverError("Session expired", "SESSION_EXPIRED");
+
 		const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["userId"]) });
 		if (!user) throw new ResolverError("User not found", "USER_NOT_FOUND");
 
