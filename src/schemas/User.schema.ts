@@ -1,5 +1,4 @@
 import { Field, ObjectType, ID, InputType, Int } from "type-graphql";
-import { IsEmail, MinLength, MaxLength } from "class-validator";
 import { prop, getModelForClass, pre } from "@typegoose/typegoose";
 
 @pre<User>("save", function () {
@@ -32,11 +31,11 @@ export class User {
 	password!: string;
 
 	@Field(() => Date)
-	@prop({ type: () => Date, default: () => Date.now() })
+	@prop({ type: () => Date, default: () => Date.now(), required: true })
 	createdAt?: number;
 
 	@Field(() => Date)
-	@prop({ type: () => Date, default: () => Date.now() })
+	@prop({ type: () => Date, default: () => Date.now(), required: true })
 	updatedAt?: number;
 }
 
