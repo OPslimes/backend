@@ -7,6 +7,7 @@ import { mongoose } from "@typegoose/typegoose";
  */
 export const connectToDB = async (options?: mongoose.ConnectOptions): Promise<typeof mongoose> => {
   try {
+    console.log("Connecting to database...");
     const mongooseClient = await mongoose.connect(process.env.MONGO_URI!, options);
     console.log(`Connected to ${mongooseClient.connection.name} database`);
     return mongooseClient;

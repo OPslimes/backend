@@ -53,7 +53,6 @@ const startServer = async () => {
     }),
     context: ({ req, res }) => ({ req, res }),
     debug: false,
-    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
   });
 
   console.log("\nServer starting...");
