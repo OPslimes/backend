@@ -1,29 +1,29 @@
 import { ApolloError } from "apollo-server-express";
 
 export class ResolverError extends ApolloError {
- public code: string;
- public extensions: any;
- readonly name: string;
+  public code: string;
+  public extensions: any;
+  readonly name: string;
 
- /**
-  * Return Errors when something went wrong.
-  * @param {string} message Error Message. Eg. "User was not found."
-  * @param {string} code Error Code. Eg. "USER_NOT_FOUND"
-  * @param {any} extensions Extra error field for more error clarification. Eg.
-  * ```ts
-  *  [{
-  *      	field: "email",
-  *      	message: "Email is not valid."
-  *  }]
-  * ```
-  */
- constructor(message: string, code?: string, extensions?: any) {
-  super(message, code);
-  this.extensions = { code, ...extensions };
-  Object.defineProperty(this, "name", { value: "UserResolverError" });
- }
+  /**
+   * Return Errors when something went wrong.
+   * @param {string} message Error Message. Eg. "User was not found."
+   * @param {string} code Error Code. Eg. "USER_NOT_FOUND"
+   * @param {any} extensions Extra error field for more error clarification. Eg.
+   * ```ts
+   *  [{
+   *      	field: "email",
+   *      	message: "Email is not valid."
+   *  }]
+   * ```
+   */
+  constructor(message: string, code?: string, extensions?: any) {
+    super(message, code);
+    this.extensions = { code, ...extensions };
+    Object.defineProperty(this, "name", { value: "UserResolverError" });
+  }
 
- toString() {
-  return `${this.message} --- ${this.code}`;
- }
+  toString() {
+    return `${this.message} --- ${this.code}`;
+  }
 }

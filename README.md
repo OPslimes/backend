@@ -11,6 +11,7 @@ if you get any errors during the process run this command
 
 ```cmd
 npm install -g typescript
+npm install -g ts-node
 ```
 
 <br>
