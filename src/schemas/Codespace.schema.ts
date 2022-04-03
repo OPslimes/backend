@@ -1,6 +1,18 @@
 import { Field, ObjectType, ID, InputType, Int } from "type-graphql";
-import { prop, getModelForClass } from "@typegoose/typegoose";
+import { prop, getModelForClass, pre } from "@typegoose/typegoose";
 
+import { encode } from "../utils/utils";
+
+/**
+ * this function gets called before saving the model to the database
+ */
+@pre<Codespace>("save", function () {
+  this.updatedAt = Date.now();
+
+  if (!this.isModified("code")) return;
+
+  this.code = encode(this.code!);
+})
 @ObjectType({ description: "Codespace structure" })
 export class Codespace {
   @Field(() => ID)
@@ -8,23 +20,27 @@ export class Codespace {
 
   @Field(() => String)
   @prop({ required: true })
-  title!: string;
+  title?: string;
 
   @Field(() => String)
   @prop({ default: () => "", required: false })
-  description!: string;
+  description?: string;
 
   @Field(() => String)
   @prop({ required: true })
-  code!: string;
+  code?: string;
 
   @Field(() => String)
   @prop({ required: true })
-  language!: string;
+  language?: string;
 
   @Field(() => ID)
   @prop({ required: true })
   owner!: string;
+
+  @Field(() => Boolean)
+  @prop({ default: () => false, required: true })
+  isPublic!: boolean;
 
   @Field(() => Int)
   @prop({ default: () => 0, required: true })
@@ -59,15 +75,18 @@ export const CodespaceModel = getModelForClass<typeof Codespace>(Codespace);
 
 @InputType()
 export class CreateCodespaceInput {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   title: string;
 
   @Field(() => String, { nullable: true })
   description: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   code: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   language: string;
+
+  @Field(() => Boolean, { nullable: true })
+  isPublic: boolean;
 }
