@@ -52,8 +52,8 @@ export class UserResolver {
    * @param input input object with email and password fields. @Note: "input" must be the name of the argument when creating user.
    * @returns user user object
    */
-  @Mutation(() => User)
-  async createUser(@Arg("input") input: CreateUserInput): Promise<User> {
+  @Mutation(() => Boolean)
+  async createUser(@Arg("input") input: CreateUserInput): Promise<boolean> {
     // check if email or password, etc are empty
     if (!input.name || !input.username || !input.email || !input.password)
       throw new ResolverError("Name, username, email or password is missing", "INVALID_INPUT");
@@ -61,23 +61,19 @@ export class UserResolver {
     // check if email is valid
     if (!isEmail(input.email))
       throw new ResolverError("Invalid email", "INVALID_EMAIL", {
-        errors: [
-          {
-            field: "email",
-            message: "Invalid email",
-          },
-        ],
+        errors: {
+          field: "email",
+          message: "Invalid email",
+        },
       });
 
     // check if username is valid
     if (input.username.length < 3 || input.username.length > 20)
       throw new ResolverError("Invalid username", "INVALID_USERNAME", {
-        errors: [
-          {
-            field: "username",
-            message: "Invalid username",
-          },
-        ],
+        errors: {
+          field: "username",
+          message: "Invalid username",
+        },
       });
 
     // check if password is valid
@@ -90,28 +86,24 @@ export class UserResolver {
     const isAlreadyExistsEmail = await UserModel.findOne({ email: userInput.email });
     if (isAlreadyExistsEmail)
       throw new ResolverError("Email already exists", "EMAIL_ALREADY_EXISTS", {
-        errors: [
-          {
-            field: "email",
-            message: "Email already exists",
-          },
-        ],
+        errors: {
+          field: "email",
+          message: "Email already exists",
+        },
       });
 
     // check if username is already taken
     const isAlreadyExistsUsername = await UserModel.findOne({ username: userInput.username });
     if (isAlreadyExistsUsername)
       throw new ResolverError("Username already exists", "USERNAME_ALREADY_EXISTS", {
-        errors: [
-          {
-            field: "username",
-            message: "Username already exists",
-          },
-        ],
+        errors: {
+          field: "username",
+          message: "Username already exists",
+        },
       });
 
     const { _id } = await userInput.save();
-    return (await UserModel.findOne({ _id: _id }))!.toObject();
+    return true;
   }
 
   /**
