@@ -57,10 +57,20 @@ export class CreateUserInput {
 }
 
 @InputType()
-export class LoginUserInput {
+export class LoginUserInputByEmail {
   @Field(() => String)
   email: string;
 
   @Field(() => String)
   password: string;
 }
+
+@InputType()
+export class LoginUserInputByUsername {
+  @Field(() => String)
+  username: string;
+
+  @Field(() => String)
+  password: string;
+}
+

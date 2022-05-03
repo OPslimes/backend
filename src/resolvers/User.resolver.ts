@@ -167,4 +167,73 @@ export class UserResolver {
 
     return user;
   }
+
+  @Mutation(() => User)
+  async loginByUsernameorEmailAndPassword(
+    @Arg("input") input: string,
+    @Arg("password") password: string,
+    @Ctx() { res }: Context
+  ): Promise<User | string> {
+    let email = "", username = "";
+    // check if username or password are empty
+    if (!input || !password) throw new ResolverError("Username/Email or password is missing");
+
+    if(!isEmail(input)){
+      username = input;
+      if (input.length < 3 || input.length > 20)
+        throw new ResolverError("Invalid username", "INVALID_USERNAME", {
+          errors: {
+            field: "username",
+            message: "Invalid username",
+          },
+        });
+      }else{
+        email = input;
+        if (!isEmail(input))
+          throw new ResolverError("Invalid email", "INVALID_EMAIL", {
+            errors: {
+              field: "email",
+              message: "Invalid email",
+            },
+          });
+      }
+    // check if password is valid
+    if (password.length < 6 || password.length > 50)
+      throw new ResolverError("Password must be between 6 and 50 characters", "INVALID_PASSWORD");
+    // check if user exists by username and password
+    let user: any = null;
+    if(email) {user = await UserModel.findOne({ email:email, password:password });} 
+    else if (username) {user = await UserModel.findOne({ username:username, password:password });}
+    if (!user)
+      throw new ResolverError("Invalid username/email or password", "INVALID_CREDENTIALS", {
+        errors: [
+          {
+            field: "username/email",
+            message: "Invalid username/email",
+          },
+          {
+            field: "password",
+            message: "Invalid password",
+          },
+        ],
+      });
+
+    user.toObject();
+
+    // set userId cookie, so we can access user data without logging in again
+    //TODO: hash user id
+
+    const cookieOptions: CookieOptions = {
+      maxAge: 1000 * 60 * 60 * 24 * 7, // Expires in 1 week
+      httpOnly: false,
+      sameSite: "lax",
+    };
+
+    res.cookie("userId", encodeURIComponent(user._id), cookieOptions);
+
+    return user;
+  }
 }
+
+
+
