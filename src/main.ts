@@ -29,7 +29,14 @@ const startServer = async () => {
   const PORT = process.env.PORT || 4000;
 
   app.use(express.json());
-  app.use(cors());
+  app.use(
+    cors({
+      origin: true,
+      credentials: true,
+      optionsSuccessStatus: 200,
+      methods: "POST",
+    })
+  );
 
   // need cookieParser middleware before we can do anything with cookies
   app.use(cookieParser());
@@ -51,7 +58,7 @@ const startServer = async () => {
   console.log("\nServer starting...");
   await server.start();
 
-  server.applyMiddleware({ app, path: "/api/v1/graphql" });
+  server.applyMiddleware({ app, path: "/api/v1/graphql", cors: false });
 
   app.listen(PORT, () => console.log(`Server started on http://localhost:${PORT}/api/v1/graphql`));
 };
