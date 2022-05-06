@@ -1,7 +1,7 @@
 import { Field, ObjectType, ID, InputType, Int } from "type-graphql";
 import { prop, getModelForClass, pre } from "@typegoose/typegoose";
 
-import { encode } from "../utils/utils";
+import { encode } from "../../utils/utils";
 
 /**
  * this function gets called before saving the model to the database

@@ -1,8 +1,8 @@
 import { Arg, Mutation, Query, Resolver, Ctx } from "type-graphql";
 import mongoose from "mongoose";
 
-import { Codespace, CodespaceModel, CreateCodespaceInput } from "../schemas/Codespace.schema";
-import { UserModel } from "../schemas/User.schema";
+import { Codespace, CodespaceModel, CreateCodespaceInput } from "../schemas/codespace/Codespace.schema";
+import { UserModel } from "../schemas/user/User.schema";
 import { ResolverError } from "../utils/index";
 import { Context } from "../types/context";
 import { encode, decode } from "../utils/utils";
@@ -11,7 +11,7 @@ import { encode, decode } from "../utils/utils";
 export class CodespaceResolver {
   @Mutation(() => Codespace)
   async createCodespace(@Arg("input") input: CreateCodespaceInput, @Ctx() { req }: Context): Promise<Codespace> {
-    if (!req.cookies["userId"]) throw new ResolverError("Session expired.", "SESSION_EXPIRED");
+    if (!req.cookies["token"]) throw new ResolverError("Session expired.", "SESSION_EXPIRED");
 
     if (!input.title || !input.code || !input.language)
       throw new ResolverError("Title, code or language is missing.", "INVALID_CODESPACE_INPUT");
@@ -20,7 +20,7 @@ export class CodespaceResolver {
     if (input.title.length > 50 || input.title.length < 3)
       throw new ResolverError("Title must be between 3 and 50.", "INVALID_CODESPACE_INPUT");
 
-    const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["userId"]) });
+    const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["token"]) });
 
     if (!user) throw new ResolverError("Something went wrong.", "SOMETHING_WENT_WRONG");
 
@@ -34,6 +34,9 @@ export class CodespaceResolver {
     // convert code to base64 and save
     codespace.code = encode(codespace.code!);
     await codespace.save();
+    // update user codespace count
+    user.codespacesCount!++;
+    await user.save();
     return codespace.toObject();
   }
 
@@ -50,12 +53,12 @@ export class CodespaceResolver {
     @Arg("updatedInput") updatedInput: CreateCodespaceInput,
     @Ctx() { req }: Context
   ): Promise<Codespace> {
-    if (!req.cookies["userId"]) throw new ResolverError("Session expired", "SESSION_EXPIRED");
+    if (!req.cookies["token"]) throw new ResolverError("Session expired", "SESSION_EXPIRED");
 
     if (!(await CodespaceModel.findOne({ title: title })))
       throw new ResolverError("Codespace not found.", "CODESPACE_NOT_FOUND");
 
-    const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["userId"]) });
+    const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["token"]) });
 
     if (!user) throw new ResolverError("Something went wrong.", "SOMETHING_WENT_WRONG");
 
@@ -81,10 +84,10 @@ export class CodespaceResolver {
    */
   @Query(() => Codespace)
   async searchCodespaceForUserByTitle(@Arg("title") title: string, @Ctx() { req }: Context): Promise<Codespace> {
-    if (!req.cookies["userId"]) throw new ResolverError("Session expired", "SESSION_EXPIRED");
+    if (!req.cookies["token"]) throw new ResolverError("Session expired", "SESSION_EXPIRED");
     if (!title) throw new ResolverError("Title is missing.", "INVALID_CODESPACE_INPUT");
 
-    const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["userId"]) });
+    const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["token"]) });
 
     if (!user) throw new ResolverError("Something went wrong.", "SOMETHING_WENT_WRONG");
 
@@ -118,9 +121,9 @@ export class CodespaceResolver {
    */
   @Query(() => [Codespace])
   async getCodespacesForUser(@Ctx() { req }: Context): Promise<Codespace[]> {
-    if (!req.cookies["userId"]) throw new ResolverError("Session expired", "SESSION_EXPIRED");
+    if (!req.cookies["token"]) throw new ResolverError("Session expired", "SESSION_EXPIRED");
 
-    const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["userId"]) });
+    const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["token"]) });
 
     if (!user) throw new ResolverError("Something went wrong.", "SOMETHING_WENT_WRONG");
 

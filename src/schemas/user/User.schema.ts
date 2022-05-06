@@ -1,5 +1,6 @@
 import { Field, ObjectType, ID, InputType, Int } from "type-graphql";
 import { prop, getModelForClass, pre } from "@typegoose/typegoose";
+import { DEFAULT_USER_AVATAR } from "../../utils";
 
 @pre<User>("save", function () {
   this.updatedAt = Date.now();
@@ -13,6 +14,10 @@ import { prop, getModelForClass, pre } from "@typegoose/typegoose";
 export class User {
   @Field(() => ID)
   _id?: string;
+
+  @Field(() => String)
+  @prop({ default: () => DEFAULT_USER_AVATAR, required: true })
+  avatar!: string;
 
   @Field(() => String)
   @prop({ required: true })
@@ -30,6 +35,14 @@ export class User {
   @prop({ required: true })
   password!: string;
 
+  @Field(() => Int)
+  @prop({ default: () => 0, required: true })
+  followers?: number;
+
+  @Field(() => Int)
+  @prop({ default: () => 0, required: true })
+  codespacesCount?: number;
+
   @Field(() => Date)
   @prop({ type: () => Date, default: () => Date.now(), required: true })
   createdAt?: number;
@@ -37,6 +50,10 @@ export class User {
   @Field(() => Date)
   @prop({ type: () => Date, default: () => Date.now(), required: true })
   updatedAt?: number;
+
+  @Field(() => Date)
+  @prop({ type: () => Date, default: () => Date.now(), required: true })
+  lastLogin?: number;
 }
 
 export const UserModel = getModelForClass<typeof User>(User);
@@ -73,4 +90,3 @@ export class LoginUserInputByUsername {
   @Field(() => String)
   password: string;
 }
-

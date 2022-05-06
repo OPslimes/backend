@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 import { CookieOptions } from "express";
 import { isEmail } from "class-validator";
 
-import { CreateUserInput, User, UserModel } from "../schemas/User.schema";
+import { CreateUserInput, User, UserModel } from "../schemas/user/User.schema";
 import { ResolverError } from "../utils/index";
 import { Context } from "../types/context";
+import { Profile } from "../schemas/user/Profile.schema";
 
 @Resolver(User)
 export class UserResolver {
@@ -43,6 +44,9 @@ export class UserResolver {
 
     const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["token"]) });
     if (!user) throw new ResolverError("User not found", "USER_NOT_FOUND");
+
+    user.lastLogin = Date.now();
+    await user.save();
 
     return user.toObject();
   }
@@ -152,6 +156,9 @@ export class UserResolver {
         ],
       });
 
+    user.lastLogin = Date.now();
+    await user.save();
+
     user.toObject();
 
     // set userId cookie, so we can access user data without logging in again
@@ -220,6 +227,8 @@ export class UserResolver {
           },
         ],
       });
+    user.lastLogin = Date.now();
+    await user.save();
 
     user.toObject();
 
@@ -235,5 +244,19 @@ export class UserResolver {
     res.cookie("token", encodeURIComponent(user._id), cookieOptions);
 
     return user;
+  }
+
+  @Query(() => [Profile])
+  async searchUsers(@Arg("username") username: string): Promise<Profile[] | undefined> {
+    if (username.length < 3 || username.length > 20)
+      throw new ResolverError("Invalid username", "INVALID_USERNAME", {
+        errors: {
+          field: "username",
+          message: "Invalid username",
+        },
+      });
+
+    const users = await UserModel.find({ username: { $regex: username, $options: "i" } });
+    return users.map((user) => user.toObject());
   }
 }
