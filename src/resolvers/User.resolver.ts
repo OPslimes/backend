@@ -39,9 +39,9 @@ export class UserResolver {
    */
   @Query(() => User)
   async me(@Ctx() { req }: Context): Promise<User> {
-    if (!req.cookies["userId"]) throw new ResolverError("Session expired", "SESSION_EXPIRED");
+    if (!req.cookies["token"]) throw new ResolverError("Session expired", "SESSION_EXPIRED");
 
-    const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["userId"]) });
+    const user = await UserModel.findOne({ _id: decodeURIComponent(req.cookies["token"]) });
     if (!user) throw new ResolverError("User not found", "USER_NOT_FOUND");
 
     return user.toObject();
@@ -162,7 +162,7 @@ export class UserResolver {
       httpOnly: false,
     };
 
-    res.cookie("userId", encodeURIComponent(user._id), cookieOptions);
+    res.cookie("token", encodeURIComponent(user._id), cookieOptions);
 
     return user;
   }
@@ -232,7 +232,7 @@ export class UserResolver {
       sameSite: "lax",
     };
 
-    res.cookie("userId", encodeURIComponent(user._id), cookieOptions);
+    res.cookie("token", encodeURIComponent(user._id), cookieOptions);
 
     return user;
   }
