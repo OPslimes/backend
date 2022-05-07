@@ -7,7 +7,7 @@ export class Profile {
   avatar!: string;
 
   @Field(() => String)
-  name!: string;
+  name?: string;
 
   @Field(() => String)
   username!: string;
@@ -26,7 +26,4 @@ export class Profile {
 
   @Field(() => Date)
   updatedAt?: number;
-
-  @Field(() => Date)
-  lastLogin?: number;
 }

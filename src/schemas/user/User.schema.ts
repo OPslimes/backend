@@ -1,5 +1,6 @@
 import { Field, ObjectType, ID, InputType, Int } from "type-graphql";
 import { prop, getModelForClass, pre } from "@typegoose/typegoose";
+
 import { DEFAULT_USER_AVATAR } from "../../utils";
 
 @pre<User>("save", function () {
@@ -20,8 +21,8 @@ export class User {
   avatar!: string;
 
   @Field(() => String)
-  @prop({ required: true })
-  name!: string;
+  @prop({ required: false })
+  name?: string;
 
   @Field(() => String)
   @prop({ required: true })
@@ -50,20 +51,16 @@ export class User {
   @Field(() => Date)
   @prop({ type: () => Date, default: () => Date.now(), required: true })
   updatedAt?: number;
-
-  @Field(() => Date)
-  @prop({ type: () => Date, default: () => Date.now(), required: true })
-  lastLogin?: number;
 }
 
 export const UserModel = getModelForClass<typeof User>(User);
 
 @InputType()
 export class CreateUserInput {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   name: string;
 
-  @Field(() => String, { nullable: false })
+  @Field(() => String)
   username: string;
 
   @Field(() => String)
@@ -74,19 +71,19 @@ export class CreateUserInput {
 }
 
 @InputType()
-export class LoginUserInputByEmail {
-  @Field(() => String)
-  email: string;
+export class UpdateUserInput {
+  @Field(() => String, { nullable: true })
+  name: string;
 
-  @Field(() => String)
-  password: string;
-}
-
-@InputType()
-export class LoginUserInputByUsername {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   username: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  email: string;
+
+  @Field(() => String, { nullable: true })
   password: string;
+
+  @Field(() => String, { nullable: true })
+  avatar: string;
 }
